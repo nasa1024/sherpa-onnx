@@ -190,9 +190,11 @@ OfflineWhisperGreedySearchDecoder::Decode(Ort::Value cross_k,
     }
   }
 
-  // assume at most 6 tokens per second
-  int32_t num_possible_tokens = num_feature_frames / 100.0 * 6;
-  num_possible_tokens = std::min<int32_t>(num_possible_tokens, n_text_ctx / 2);
+  // We use a large value here to avoid truncation for languages with high token
+  // density, e.g., Thai.
+  // See https://github.com/k2-fsa/sherpa-onnx/issues/488
+  int32_t num_possible_tokens = num_feature_frames / 100.0 * 20;
+  num_possible_tokens = std::min<int32_t>(num_possible_tokens, n_text_ctx);
 
   for (int32_t i = 0; i < num_possible_tokens; ++i) {
     if (max_token_id == eot) {
